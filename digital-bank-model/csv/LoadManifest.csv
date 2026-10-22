@@ -5,8 +5,8 @@ DimChannel,7
 DimOnboardingStep,8
 DimFailureReason,14
 DimBank,34
-DimDate,368
+DimDate,365
 DimTime,24
 FactOnboardingEvents,339338
 FactApplication,50000
-FactPayments,1017402
+FactPayments,100871

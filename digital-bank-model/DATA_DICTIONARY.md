@@ -171,7 +171,7 @@ One row per customer. This is the summary of FactOnboardingEvents, plus the firs
 
 ## FactPayments
 
-One row per payment attempt. Retries are extra rows. Files are split by month: `FactPayments_YYYYMM.csv`. A few retries fall into `FactPayments_202610.csv`.
+One row per payment attempt. Retries are extra rows. All attempts for the year are in `FactPayments.csv`.
 
 | Column | Description |
 | --- | --- |

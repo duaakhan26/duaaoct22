@@ -1,7 +1,7 @@
 """Generate the synthetic digital-bank star schema as CSV files.
 
-Default scale matches the working session: 50,000 applications over 12 months
-and about 1 million payment attempts, including retries.
+Default scale is 50,000 applications and about 100,000 payment attempts,
+including retries, for 1 Oct 2025 through 30 Sep 2026. Payments are one file.
 
 Run from this folder:
     python generate_data.py
@@ -815,12 +815,11 @@ def generate(customers: int, primary_payments: int, seed: int, out_dir: Path) ->
 
     emit("FactApplication", "FactApplication.csv", application_rows())
 
-    payment_header = headers("FactPayments")
-    by_month: dict[str, list] = defaultdict(list)
+    payment_rows = []
 
     def append_payment(payment_key, acct, channel_key, bank_key, minute, amount_value, status, reason_code, latency_ms, is_retry, original):
         stamp = dt_from_minute(minute)
-        by_month[stamp.strftime("%Y%m")].append(
+        payment_rows.append(
             [
                 payment_key,
                 f"P{payment_key:010d}",
@@ -856,8 +855,8 @@ def generate(customers: int, primary_payments: int, seed: int, out_dir: Path) ->
     for row in retry_rows:
         append_payment(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[9], row[10])
 
-    for token in sorted(by_month):
-        emit("FactPayments", f"FactPayments_{token}.csv", by_month[token])
+    payment_rows.sort(key=lambda row: (row[5], row[0]))
+    emit("FactPayments", "FactPayments.csv", payment_rows)
 
     write_csv(
         out_dir / "LoadFiles.csv",
@@ -888,7 +887,7 @@ def generate(customers: int, primary_payments: int, seed: int, out_dir: Path) ->
 def parse_args():
     parser = argparse.ArgumentParser(description="Generate digital bank CSVs.")
     parser.add_argument("--customers", type=int, default=50_000)
-    parser.add_argument("--primary-payments", type=int, default=960_000)
+    parser.add_argument("--primary-payments", type=int, default=94_000)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--out", type=Path, default=Path(__file__).resolve().parent / "csv")
     return parser.parse_args()

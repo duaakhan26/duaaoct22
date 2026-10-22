@@ -4,7 +4,7 @@ Synthetic star schema for a Pakistani digital bank: mobile onboarding through NA
 
 - **Dimensions:** DimCustomer (geography and device on the customer), DimAccount (product on the account), DimChannel, DimOnboardingStep, DimFailureReason, DimBank, DimDate, DimTime
 - **Facts:** FactOnboardingEvents (one row per step attempt), FactApplication (one row per customer), FactPayments (one row per payment attempt, including retries)
-- **Scale:** 50,000 applications from 1 Oct 2025 through 30 Sep 2026, about 1 million payment attempts
+- **Scale:** 50,000 applications from 1 Oct 2025 through 30 Sep 2026, about 100,000 payment attempts in `csv/FactPayments.csv`
 - **Keys:** integer surrogate keys. Date keys are `yyyymmdd`. Customer identifiers are 16-character hashes, not CNICs.
 
 `GENERATION_REPORT.md` is the measured funnel, failure rates, and the check results. `DATA_DICTIONARY.md` lists every column.
@@ -19,7 +19,7 @@ python3 generate_data.py
 Needs Python 3.10+ and numpy. The default seed is 42. A smaller set for a laptop load is:
 
 ```bash
-python3 generate_data.py --customers 8000 --primary-payments 140000 --out /tmp/dbpilot
+python3 generate_data.py --customers 8000 --primary-payments 20000 --out /tmp/dbpilot
 ```
 
 That smaller run writes only to the path you pass. The committed CSVs and the two SQL scripts stay as they are. Those scripts match this CSV set. Regenerating at a different size does not rewrite them.
@@ -52,4 +52,4 @@ The CSVs use LF line endings. The load strips a trailing CR, so a copy that was 
 
 `ssas/measures.dax` has the onboarding, payment, and first-payment measures from the working session. Keep relationships single-direction. One active date relationship per fact: event date, application start date, and payment date. Leave the other date keys inactive so a date filter does not also filter on account-open date.
 
-FactPayments is already split by month in `csv/FactPayments_YYYYMM.csv`, which matches a monthly partition.
+FactPayments is one file, `csv/FactPayments.csv`, covering that year.

@@ -11,7 +11,7 @@ from datetime import date, datetime
 
 CALENDAR_START = date(2025, 10, 1)
 AS_OF = date(2026, 9, 30)
-CALENDAR_END = date(2026, 10, 3)
+CALENDAR_END = AS_OF
 
 RAMADAN_START = date(2026, 2, 18)
 RAMADAN_END = date(2026, 3, 19)

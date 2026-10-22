@@ -34,8 +34,8 @@ from model_schema import (
 )
 
 FULL_SCALE_CUSTOMERS = 50_000
-PAYMENT_MIN = 900_000
-PAYMENT_MAX = 1_150_000
+PAYMENT_MIN = 90_000
+PAYMENT_MAX = 110_000
 
 
 class Report:
@@ -392,7 +392,7 @@ def validate(csv_dir: Path) -> Report:
     )
 
     # Payments.
-    payment_files = sorted(csv_dir.glob("FactPayments_*.csv"))
+    payment_files = [csv_dir / "FactPayments.csv"]
     amounts: list[float] = []
     channel_total = defaultdict(int)
     channel_fail = defaultdict(int)
@@ -647,7 +647,7 @@ def validate(csv_dir: Path) -> Report:
 
     if len(customers) >= 40_000:
         report.check(
-            "Scale is about 50,000 applications and 1M payments",
+            "Scale is about 50,000 applications and 100,000 payments",
             len(customers) == FULL_SCALE_CUSTOMERS and PAYMENT_MIN <= payment_n <= PAYMENT_MAX,
             f"{len(customers):,} applications; {payment_n:,} payments",
         )
