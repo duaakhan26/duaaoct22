@@ -1,0 +1,8 @@
+ChannelKey,ChannelName,ChannelGroup
+1,Raast P2P,Raast
+2,Raast QR,Raast
+3,1LINK IBFT,IBFT
+4,Intra-bank transfer,Internal
+5,Bill pay,Bills
+6,Mobile top-up,Top-up
+7,Card,Card

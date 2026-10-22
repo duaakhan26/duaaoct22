@@ -1,0 +1,35 @@
+BankKey,BankName,BankType
+1,Own Digital Bank,Internal
+2,HBL,Bank
+3,UBL,Bank
+4,MCB,Bank
+5,Meezan Bank,Bank
+6,Allied Bank,Bank
+7,Bank Alfalah,Bank
+8,Habib Metro,Bank
+9,Bank Al Habib,Bank
+10,Faysal Bank,Bank
+11,Askari Bank,Bank
+12,JS Bank,Bank
+13,Soneri Bank,Bank
+14,Standard Chartered,Bank
+15,NBP,Bank
+16,Bank of Punjab,Bank
+17,Sindh Bank,Bank
+18,K-Electric,Biller
+19,LESCO,Biller
+20,IESCO,Biller
+21,SNGPL,Biller
+22,SSGC,Biller
+23,PTCL,Biller
+24,Nayatel,Biller
+25,1Bill,Biller
+26,Jazz,Biller
+27,Telenor,Biller
+28,Zong,Biller
+29,Ufone,Biller
+30,Food and grocery QR,Merchant
+31,Retail QR,Merchant
+32,Transport QR,Merchant
+33,E-commerce,Merchant
+34,Card acceptance,Merchant
