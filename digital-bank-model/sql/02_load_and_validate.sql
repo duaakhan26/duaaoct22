@@ -181,68 +181,64 @@ IF RIGHT(@DataPath, 1) <> N'\'
 IF EXISTS (SELECT 1 FROM dbo.DimCustomer)
     THROW 50001, N'Tables are not empty. Run 01_create_schema.sql before loading again.', 1;
 
-TRUNCATE TABLE stg.DimCustomer;
-SET @sql = N'BULK INSERT stg.DimCustomer
-    FROM ''' + @DataPath + N'DimCustomer.csv''
+TRUNCATE TABLE stg.DimDate;
+SET @sql = N'BULK INSERT stg.DimDate
+    FROM ''' + @DataPath + N'DimDate.csv''
     WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', ROWTERMINATOR = ''0x0a'', TABLOCK, KEEPNULLS);';
 EXEC (@sql);
-SET @actual = (SELECT COUNT(*) FROM stg.DimCustomer);
-IF @actual <> 50000
+SET @actual = (SELECT COUNT(*) FROM stg.DimDate);
+IF @actual <> 365
 BEGIN
-    SET @msg = N'DimCustomer.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 50000.';
+    SET @msg = N'DimDate.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 365.';
     THROW 50002, @msg, 1;
 END;
-INSERT INTO dbo.DimCustomer ([CustomerKey], [CustomerID], [CNICToken], [AgeBand], [Gender], [Occupation], [Province], [City], [UrbanRural], [MobileNetwork], [DeviceOS], [DeviceBrand], [AppVersion], [SignupDate], [SignupDateKey])
+INSERT INTO dbo.DimDate ([DateKey], [FullDate], [CalendarYear], [Quarter], [MonthNumber], [MonthName], [YearMonth], [DayOfMonth], [DayOfWeek], [DayName], [IsWeekend], [IsSalaryWeek], [IsRamadan], [IsEid], [EidName], [IsMonthEnd])
 SELECT
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[CustomerKey], CHAR(13), ''), '')) AS [CustomerKey],
-        NULLIF(REPLACE(s.[CustomerID], CHAR(13), ''), '') AS [CustomerID],
-        NULLIF(REPLACE(s.[CNICToken], CHAR(13), ''), '') AS [CNICToken],
-        NULLIF(REPLACE(s.[AgeBand], CHAR(13), ''), '') AS [AgeBand],
-        NULLIF(REPLACE(s.[Gender], CHAR(13), ''), '') AS [Gender],
-        NULLIF(REPLACE(s.[Occupation], CHAR(13), ''), '') AS [Occupation],
-        NULLIF(REPLACE(s.[Province], CHAR(13), ''), '') AS [Province],
-        NULLIF(REPLACE(s.[City], CHAR(13), ''), '') AS [City],
-        NULLIF(REPLACE(s.[UrbanRural], CHAR(13), ''), '') AS [UrbanRural],
-        NULLIF(REPLACE(s.[MobileNetwork], CHAR(13), ''), '') AS [MobileNetwork],
-        NULLIF(REPLACE(s.[DeviceOS], CHAR(13), ''), '') AS [DeviceOS],
-        NULLIF(REPLACE(s.[DeviceBrand], CHAR(13), ''), '') AS [DeviceBrand],
-        NULLIF(REPLACE(s.[AppVersion], CHAR(13), ''), '') AS [AppVersion],
-        TRY_CONVERT(date, NULLIF(REPLACE(s.[SignupDate], CHAR(13), ''), '')) AS [SignupDate],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[SignupDateKey], CHAR(13), ''), '')) AS [SignupDateKey]
-FROM stg.DimCustomer AS s;
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[DateKey], CHAR(13), ''), '')) AS [DateKey],
+        TRY_CONVERT(date, NULLIF(REPLACE(s.[FullDate], CHAR(13), ''), '')) AS [FullDate],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[CalendarYear], CHAR(13), ''), '')) AS [CalendarYear],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[Quarter], CHAR(13), ''), '')) AS [Quarter],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[MonthNumber], CHAR(13), ''), '')) AS [MonthNumber],
+        NULLIF(REPLACE(s.[MonthName], CHAR(13), ''), '') AS [MonthName],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[YearMonth], CHAR(13), ''), '')) AS [YearMonth],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[DayOfMonth], CHAR(13), ''), '')) AS [DayOfMonth],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[DayOfWeek], CHAR(13), ''), '')) AS [DayOfWeek],
+        NULLIF(REPLACE(s.[DayName], CHAR(13), ''), '') AS [DayName],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsWeekend], CHAR(13), ''), '')) AS [IsWeekend],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsSalaryWeek], CHAR(13), ''), '')) AS [IsSalaryWeek],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsRamadan], CHAR(13), ''), '')) AS [IsRamadan],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsEid], CHAR(13), ''), '')) AS [IsEid],
+        NULLIF(REPLACE(s.[EidName], CHAR(13), ''), '') AS [EidName],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsMonthEnd], CHAR(13), ''), '')) AS [IsMonthEnd]
+FROM stg.DimDate AS s;
 IF @@ROWCOUNT <> @actual
 BEGIN
-    SET @msg = N'DimCustomer.csv could not be converted into dbo.DimCustomer. A blank landed in a required column or a value was not a valid type.';
+    SET @msg = N'DimDate.csv could not be converted into dbo.DimDate. A blank landed in a required column or a value was not a valid type.';
     THROW 50003, @msg, 1;
 END;
 
-TRUNCATE TABLE stg.DimAccount;
-SET @sql = N'BULK INSERT stg.DimAccount
-    FROM ''' + @DataPath + N'DimAccount.csv''
+TRUNCATE TABLE stg.DimTime;
+SET @sql = N'BULK INSERT stg.DimTime
+    FROM ''' + @DataPath + N'DimTime.csv''
     WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', ROWTERMINATOR = ''0x0a'', TABLOCK, KEEPNULLS);';
 EXEC (@sql);
-SET @actual = (SELECT COUNT(*) FROM stg.DimAccount);
-IF @actual <> 36366
+SET @actual = (SELECT COUNT(*) FROM stg.DimTime);
+IF @actual <> 24
 BEGIN
-    SET @msg = N'DimAccount.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 36366.';
+    SET @msg = N'DimTime.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 24.';
     THROW 50002, @msg, 1;
 END;
-INSERT INTO dbo.DimAccount ([AccountKey], [AccountID], [CustomerKey], [Product], [Tier], [Status], [OpenDateTime], [OpenDate], [OpenDateKey], [RaastIDLinked])
+INSERT INTO dbo.DimTime ([TimeKey], [HourOfDay], [HourLabel], [TimeBand], [IsPeakHour])
 SELECT
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[AccountKey], CHAR(13), ''), '')) AS [AccountKey],
-        NULLIF(REPLACE(s.[AccountID], CHAR(13), ''), '') AS [AccountID],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[CustomerKey], CHAR(13), ''), '')) AS [CustomerKey],
-        NULLIF(REPLACE(s.[Product], CHAR(13), ''), '') AS [Product],
-        NULLIF(REPLACE(s.[Tier], CHAR(13), ''), '') AS [Tier],
-        NULLIF(REPLACE(s.[Status], CHAR(13), ''), '') AS [Status],
-        TRY_CONVERT(datetime2, NULLIF(REPLACE(s.[OpenDateTime], CHAR(13), ''), ''), 120) AS [OpenDateTime],
-        TRY_CONVERT(date, NULLIF(REPLACE(s.[OpenDate], CHAR(13), ''), '')) AS [OpenDate],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[OpenDateKey], CHAR(13), ''), '')) AS [OpenDateKey],
-        NULLIF(REPLACE(s.[RaastIDLinked], CHAR(13), ''), '') AS [RaastIDLinked]
-FROM stg.DimAccount AS s;
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[TimeKey], CHAR(13), ''), '')) AS [TimeKey],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[HourOfDay], CHAR(13), ''), '')) AS [HourOfDay],
+        NULLIF(REPLACE(s.[HourLabel], CHAR(13), ''), '') AS [HourLabel],
+        NULLIF(REPLACE(s.[TimeBand], CHAR(13), ''), '') AS [TimeBand],
+        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsPeakHour], CHAR(13), ''), '')) AS [IsPeakHour]
+FROM stg.DimTime AS s;
 IF @@ROWCOUNT <> @actual
 BEGIN
-    SET @msg = N'DimAccount.csv could not be converted into dbo.DimAccount. A blank landed in a required column or a value was not a valid type.';
+    SET @msg = N'DimTime.csv could not be converted into dbo.DimTime. A blank landed in a required column or a value was not a valid type.';
     THROW 50003, @msg, 1;
 END;
 
@@ -341,64 +337,68 @@ BEGIN
     THROW 50003, @msg, 1;
 END;
 
-TRUNCATE TABLE stg.DimDate;
-SET @sql = N'BULK INSERT stg.DimDate
-    FROM ''' + @DataPath + N'DimDate.csv''
+TRUNCATE TABLE stg.DimCustomer;
+SET @sql = N'BULK INSERT stg.DimCustomer
+    FROM ''' + @DataPath + N'DimCustomer.csv''
     WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', ROWTERMINATOR = ''0x0a'', TABLOCK, KEEPNULLS);';
 EXEC (@sql);
-SET @actual = (SELECT COUNT(*) FROM stg.DimDate);
-IF @actual <> 365
+SET @actual = (SELECT COUNT(*) FROM stg.DimCustomer);
+IF @actual <> 50000
 BEGIN
-    SET @msg = N'DimDate.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 365.';
+    SET @msg = N'DimCustomer.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 50000.';
     THROW 50002, @msg, 1;
 END;
-INSERT INTO dbo.DimDate ([DateKey], [FullDate], [CalendarYear], [Quarter], [MonthNumber], [MonthName], [YearMonth], [DayOfMonth], [DayOfWeek], [DayName], [IsWeekend], [IsSalaryWeek], [IsRamadan], [IsEid], [EidName], [IsMonthEnd])
+INSERT INTO dbo.DimCustomer ([CustomerKey], [CustomerID], [CNICToken], [AgeBand], [Gender], [Occupation], [Province], [City], [UrbanRural], [MobileNetwork], [DeviceOS], [DeviceBrand], [AppVersion], [SignupDate], [SignupDateKey])
 SELECT
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[DateKey], CHAR(13), ''), '')) AS [DateKey],
-        TRY_CONVERT(date, NULLIF(REPLACE(s.[FullDate], CHAR(13), ''), '')) AS [FullDate],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[CalendarYear], CHAR(13), ''), '')) AS [CalendarYear],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[Quarter], CHAR(13), ''), '')) AS [Quarter],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[MonthNumber], CHAR(13), ''), '')) AS [MonthNumber],
-        NULLIF(REPLACE(s.[MonthName], CHAR(13), ''), '') AS [MonthName],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[YearMonth], CHAR(13), ''), '')) AS [YearMonth],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[DayOfMonth], CHAR(13), ''), '')) AS [DayOfMonth],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[DayOfWeek], CHAR(13), ''), '')) AS [DayOfWeek],
-        NULLIF(REPLACE(s.[DayName], CHAR(13), ''), '') AS [DayName],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsWeekend], CHAR(13), ''), '')) AS [IsWeekend],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsSalaryWeek], CHAR(13), ''), '')) AS [IsSalaryWeek],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsRamadan], CHAR(13), ''), '')) AS [IsRamadan],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsEid], CHAR(13), ''), '')) AS [IsEid],
-        NULLIF(REPLACE(s.[EidName], CHAR(13), ''), '') AS [EidName],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsMonthEnd], CHAR(13), ''), '')) AS [IsMonthEnd]
-FROM stg.DimDate AS s;
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[CustomerKey], CHAR(13), ''), '')) AS [CustomerKey],
+        NULLIF(REPLACE(s.[CustomerID], CHAR(13), ''), '') AS [CustomerID],
+        NULLIF(REPLACE(s.[CNICToken], CHAR(13), ''), '') AS [CNICToken],
+        NULLIF(REPLACE(s.[AgeBand], CHAR(13), ''), '') AS [AgeBand],
+        NULLIF(REPLACE(s.[Gender], CHAR(13), ''), '') AS [Gender],
+        NULLIF(REPLACE(s.[Occupation], CHAR(13), ''), '') AS [Occupation],
+        NULLIF(REPLACE(s.[Province], CHAR(13), ''), '') AS [Province],
+        NULLIF(REPLACE(s.[City], CHAR(13), ''), '') AS [City],
+        NULLIF(REPLACE(s.[UrbanRural], CHAR(13), ''), '') AS [UrbanRural],
+        NULLIF(REPLACE(s.[MobileNetwork], CHAR(13), ''), '') AS [MobileNetwork],
+        NULLIF(REPLACE(s.[DeviceOS], CHAR(13), ''), '') AS [DeviceOS],
+        NULLIF(REPLACE(s.[DeviceBrand], CHAR(13), ''), '') AS [DeviceBrand],
+        NULLIF(REPLACE(s.[AppVersion], CHAR(13), ''), '') AS [AppVersion],
+        TRY_CONVERT(date, NULLIF(REPLACE(s.[SignupDate], CHAR(13), ''), '')) AS [SignupDate],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[SignupDateKey], CHAR(13), ''), '')) AS [SignupDateKey]
+FROM stg.DimCustomer AS s;
 IF @@ROWCOUNT <> @actual
 BEGIN
-    SET @msg = N'DimDate.csv could not be converted into dbo.DimDate. A blank landed in a required column or a value was not a valid type.';
+    SET @msg = N'DimCustomer.csv could not be converted into dbo.DimCustomer. A blank landed in a required column or a value was not a valid type.';
     THROW 50003, @msg, 1;
 END;
 
-TRUNCATE TABLE stg.DimTime;
-SET @sql = N'BULK INSERT stg.DimTime
-    FROM ''' + @DataPath + N'DimTime.csv''
+TRUNCATE TABLE stg.DimAccount;
+SET @sql = N'BULK INSERT stg.DimAccount
+    FROM ''' + @DataPath + N'DimAccount.csv''
     WITH (FIRSTROW = 2, FIELDTERMINATOR = '','', ROWTERMINATOR = ''0x0a'', TABLOCK, KEEPNULLS);';
 EXEC (@sql);
-SET @actual = (SELECT COUNT(*) FROM stg.DimTime);
-IF @actual <> 24
+SET @actual = (SELECT COUNT(*) FROM stg.DimAccount);
+IF @actual <> 36366
 BEGIN
-    SET @msg = N'DimTime.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 24.';
+    SET @msg = N'DimAccount.csv loaded ' + CAST(@actual AS nvarchar(20)) + N' rows, expected 36366.';
     THROW 50002, @msg, 1;
 END;
-INSERT INTO dbo.DimTime ([TimeKey], [HourOfDay], [HourLabel], [TimeBand], [IsPeakHour])
+INSERT INTO dbo.DimAccount ([AccountKey], [AccountID], [CustomerKey], [Product], [Tier], [Status], [OpenDateTime], [OpenDate], [OpenDateKey], [RaastIDLinked])
 SELECT
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[TimeKey], CHAR(13), ''), '')) AS [TimeKey],
-        TRY_CONVERT(int, NULLIF(REPLACE(s.[HourOfDay], CHAR(13), ''), '')) AS [HourOfDay],
-        NULLIF(REPLACE(s.[HourLabel], CHAR(13), ''), '') AS [HourLabel],
-        NULLIF(REPLACE(s.[TimeBand], CHAR(13), ''), '') AS [TimeBand],
-        TRY_CONVERT(bit, NULLIF(REPLACE(s.[IsPeakHour], CHAR(13), ''), '')) AS [IsPeakHour]
-FROM stg.DimTime AS s;
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[AccountKey], CHAR(13), ''), '')) AS [AccountKey],
+        NULLIF(REPLACE(s.[AccountID], CHAR(13), ''), '') AS [AccountID],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[CustomerKey], CHAR(13), ''), '')) AS [CustomerKey],
+        NULLIF(REPLACE(s.[Product], CHAR(13), ''), '') AS [Product],
+        NULLIF(REPLACE(s.[Tier], CHAR(13), ''), '') AS [Tier],
+        NULLIF(REPLACE(s.[Status], CHAR(13), ''), '') AS [Status],
+        TRY_CONVERT(datetime2, NULLIF(REPLACE(s.[OpenDateTime], CHAR(13), ''), ''), 120) AS [OpenDateTime],
+        TRY_CONVERT(date, NULLIF(REPLACE(s.[OpenDate], CHAR(13), ''), '')) AS [OpenDate],
+        TRY_CONVERT(int, NULLIF(REPLACE(s.[OpenDateKey], CHAR(13), ''), '')) AS [OpenDateKey],
+        NULLIF(REPLACE(s.[RaastIDLinked], CHAR(13), ''), '') AS [RaastIDLinked]
+FROM stg.DimAccount AS s;
 IF @@ROWCOUNT <> @actual
 BEGIN
-    SET @msg = N'DimTime.csv could not be converted into dbo.DimTime. A blank landed in a required column or a value was not a valid type.';
+    SET @msg = N'DimAccount.csv could not be converted into dbo.DimAccount. A blank landed in a required column or a value was not a valid type.';
     THROW 50003, @msg, 1;
 END;
 
@@ -542,6 +542,9 @@ GO
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 SET DATEFIRST 1;
+
+IF NOT EXISTS (SELECT 1 FROM dbo.DimDate) OR NOT EXISTS (SELECT 1 FROM dbo.FactPayments)
+    THROW 50011, N'The load did not finish. Fix the error above, then run this script again.', 1;
 
 DROP TABLE IF EXISTS #Check;
 CREATE TABLE #Check (
@@ -688,7 +691,7 @@ INSERT INTO #Check (CheckName, Status, Detail)
 SELECT
     N'Heaviest drop is NADRA liveness',
     CASE WHEN (SELECT TOP (1) StepOrder FROM drops ORDER BY DropOff DESC, StepOrder) = 4 THEN N'PASS' ELSE N'FAIL' END,
-    (SELECT STRING_AGG(CONCAT(N'step ', StepOrder, N' drop ', DropOff), N'; ') WITHIN GROUP (ORDER BY StepOrder) FROM drops);
+    ISNULL((SELECT STRING_AGG(CONCAT(N'step ', StepOrder, N' drop ', DropOff), N'; ') WITHIN GROUP (ORDER BY StepOrder) FROM drops), N'no onboarding steps loaded');
 
 INSERT INTO #Check (CheckName, Status, Detail)
 SELECT
