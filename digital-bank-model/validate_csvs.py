@@ -1,6 +1,6 @@
 """Validate the generated CSVs against the star-schema rules and built-in behavior.
 
-The same rules are implemented in sql/04_validate.sql for SSMS. Thresholds live here
+The same rules are implemented in sql/02_load_and_validate.sql for SSMS. Thresholds live here
 and are copied into that script; change both together.
 """
 
@@ -67,7 +67,7 @@ class Report:
         lines = [
             "# Generation report",
             "",
-            "Synthetic digital-bank star schema. Checks mirror `sql/04_validate.sql`.",
+            "Synthetic digital-bank star schema. Checks mirror `sql/02_load_and_validate.sql`.",
             "",
             "| Status | Check | Detail |",
             "| --- | --- | --- |",

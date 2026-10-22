@@ -1,12 +1,167 @@
--- Primary keys, foreign keys, check constraints, and the indexes used by validation.
--- Run after 02_load_data.sql. A failing constraint means a row breaks the star schema.
+-- 01_create_schema.sql
+-- Creates DigitalBankDW and the onboarding / payments star schema.
+-- SQL Server 2017 or newer. Run this before 02_load_and_validate.sql.
+-- Running it again drops the tables and recreates them empty.
+
+IF DB_ID(N'DigitalBankDW') IS NULL
+    CREATE DATABASE DigitalBankDW;
+GO
 
 USE DigitalBankDW;
 GO
 
 SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;
-SET XACT_ABORT ON;
+
+DROP TABLE IF EXISTS dbo.FactPayments;
+DROP TABLE IF EXISTS dbo.FactApplication;
+DROP TABLE IF EXISTS dbo.FactOnboardingEvents;
+DROP TABLE IF EXISTS dbo.DimAccount;
+DROP TABLE IF EXISTS dbo.DimCustomer;
+DROP TABLE IF EXISTS dbo.DimChannel;
+DROP TABLE IF EXISTS dbo.DimOnboardingStep;
+DROP TABLE IF EXISTS dbo.DimFailureReason;
+DROP TABLE IF EXISTS dbo.DimBank;
+DROP TABLE IF EXISTS dbo.DimDate;
+DROP TABLE IF EXISTS dbo.DimTime;
+GO
+
+CREATE TABLE dbo.DimCustomer (
+    [CustomerKey] int NOT NULL,
+    [CustomerID] varchar(20) NOT NULL,
+    [CNICToken] char(16) NOT NULL,
+    [AgeBand] varchar(10) NOT NULL,
+    [Gender] varchar(10) NOT NULL,
+    [Occupation] varchar(20) NOT NULL,
+    [Province] varchar(40) NOT NULL,
+    [City] varchar(40) NOT NULL,
+    [UrbanRural] varchar(10) NOT NULL,
+    [MobileNetwork] varchar(20) NOT NULL,
+    [DeviceOS] varchar(10) NOT NULL,
+    [DeviceBrand] varchar(20) NOT NULL,
+    [AppVersion] varchar(10) NOT NULL,
+    [SignupDate] date NOT NULL,
+    [SignupDateKey] int NOT NULL
+);
+
+CREATE TABLE dbo.DimAccount (
+    [AccountKey] int NOT NULL,
+    [AccountID] varchar(20) NOT NULL,
+    [CustomerKey] int NOT NULL,
+    [Product] varchar(40) NOT NULL,
+    [Tier] varchar(20) NOT NULL,
+    [Status] varchar(20) NOT NULL,
+    [OpenDateTime] datetime2 NOT NULL,
+    [OpenDate] date NOT NULL,
+    [OpenDateKey] int NOT NULL,
+    [RaastIDLinked] char(1) NOT NULL
+);
+
+CREATE TABLE dbo.DimChannel (
+    [ChannelKey] int NOT NULL,
+    [ChannelName] varchar(40) NOT NULL,
+    [ChannelGroup] varchar(20) NOT NULL
+);
+
+CREATE TABLE dbo.DimOnboardingStep (
+    [StepKey] int NOT NULL,
+    [StepName] varchar(80) NOT NULL,
+    [StepOrder] int NOT NULL,
+    [FunnelStage] varchar(20) NOT NULL
+);
+
+CREATE TABLE dbo.DimFailureReason (
+    [FailureReasonKey] int NOT NULL,
+    [Reason] varchar(80) NOT NULL,
+    [Category] varchar(30) NOT NULL,
+    [IsRetryable] bit NOT NULL,
+    [AppliesTo] varchar(20) NOT NULL
+);
+
+CREATE TABLE dbo.DimBank (
+    [BankKey] int NOT NULL,
+    [BankName] varchar(40) NOT NULL,
+    [BankType] varchar(20) NOT NULL
+);
+
+CREATE TABLE dbo.DimDate (
+    [DateKey] int NOT NULL,
+    [FullDate] date NOT NULL,
+    [CalendarYear] int NOT NULL,
+    [Quarter] int NOT NULL,
+    [MonthNumber] int NOT NULL,
+    [MonthName] varchar(10) NOT NULL,
+    [YearMonth] int NOT NULL,
+    [DayOfMonth] int NOT NULL,
+    [DayOfWeek] int NOT NULL,
+    [DayName] varchar(10) NOT NULL,
+    [IsWeekend] bit NOT NULL,
+    [IsSalaryWeek] bit NOT NULL,
+    [IsRamadan] bit NOT NULL,
+    [IsEid] bit NOT NULL,
+    [EidName] varchar(20) NULL,
+    [IsMonthEnd] bit NOT NULL
+);
+
+CREATE TABLE dbo.DimTime (
+    [TimeKey] int NOT NULL,
+    [HourOfDay] int NOT NULL,
+    [HourLabel] char(5) NOT NULL,
+    [TimeBand] varchar(20) NOT NULL,
+    [IsPeakHour] bit NOT NULL
+);
+
+CREATE TABLE dbo.FactOnboardingEvents (
+    [EventKey] bigint NOT NULL,
+    [CustomerKey] int NOT NULL,
+    [StepKey] int NOT NULL,
+    [EventDateTime] datetime2 NOT NULL,
+    [DateKey] int NOT NULL,
+    [TimeKey] int NOT NULL,
+    [Outcome] varchar(10) NOT NULL,
+    [FailureReasonKey] int NULL,
+    [RetryNumber] int NOT NULL,
+    [ReferralSource] varchar(30) NOT NULL
+);
+
+CREATE TABLE dbo.FactApplication (
+    [ApplicationKey] int NOT NULL,
+    [CustomerKey] int NOT NULL,
+    [AccountKey] int NULL,
+    [StartDateTime] datetime2 NOT NULL,
+    [StartDateKey] int NOT NULL,
+    [StartTimeKey] int NOT NULL,
+    [EndDateTime] datetime2 NOT NULL,
+    [EndDateKey] int NOT NULL,
+    [EndTimeKey] int NOT NULL,
+    [FinalStatus] varchar(20) NOT NULL,
+    [MinutesToOpen] int NULL,
+    [TotalRetries] int NOT NULL,
+    [FailedStepKey] int NULL,
+    [ActivationDateKey] int NULL,
+    [FirstPaymentDateKey] int NULL,
+    [FirstPaymentStatus] varchar(20) NOT NULL,
+    [ReferralSource] varchar(30) NOT NULL
+);
+
+CREATE TABLE dbo.FactPayments (
+    [PaymentKey] bigint NOT NULL,
+    [PaymentID] varchar(20) NOT NULL,
+    [AccountKey] int NOT NULL,
+    [ChannelKey] int NOT NULL,
+    [BankKey] int NOT NULL,
+    [PaymentDateTime] datetime2 NOT NULL,
+    [DateKey] int NOT NULL,
+    [TimeKey] int NOT NULL,
+    [AmountPKR] decimal(18,2) NOT NULL,
+    [Status] varchar(10) NOT NULL,
+    [FailureReasonKey] int NULL,
+    [LatencyMs] int NOT NULL,
+    [IsRetry] bit NOT NULL,
+    [OriginalPaymentKey] bigint NULL
+);
+
+GO
 
 ALTER TABLE dbo.DimCustomer ADD CONSTRAINT PK_DimCustomer PRIMARY KEY CLUSTERED (CustomerKey);
 ALTER TABLE dbo.DimAccount ADD CONSTRAINT PK_DimAccount PRIMARY KEY CLUSTERED (AccountKey);

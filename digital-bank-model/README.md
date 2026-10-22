@@ -22,20 +22,16 @@ Needs Python 3.10+ and numpy. The default seed is 42. A smaller set for a laptop
 python3 generate_data.py --customers 8000 --primary-payments 140000 --out /tmp/dbpilot
 ```
 
-That smaller run does not overwrite `csv/` or the SQL load script.
+That smaller run writes only to the path you pass. The committed CSVs and the two SQL scripts stay as they are. Those scripts match this CSV set. Regenerating at a different size does not rewrite them.
 
-## Load in SSMS
+## Two scripts
 
-SQL Server 2017 or newer. The files have to be on the machine where the SQL Server service runs, and the service account has to be able to read them.
+SQL Server 2017 or newer. Copy `csv/` onto the SQL Server machine, for example `C:\DigitalBankData\`, so `DimCustomer.csv` sits directly in that folder. The service account has to be able to read it.
 
-1. Copy the contents of `csv/` to a folder such as `C:\DigitalBankData\`. Do not put them in a nested `csv` folder. `DimCustomer.csv` should sit directly in that folder.
-2. Open `sql/00_create_database.sql` and execute it.
-3. Open `sql/02_load_data.sql` and set `@DataPath` to that folder. Execute `sql/01_create_tables.sql`, then `sql/02_load_data.sql`.
-4. Execute `sql/03_add_keys.sql`. This adds the primary keys, foreign keys, and check constraints. A failure here is a broken key or an illegal value.
-5. Execute `sql/04_validate.sql`. The grid is one row per check. `PASS` and `INFO` are expected. Any `FAIL` raises an error after the grid.
-6. Execute `sql/05_helper_views.sql`. Then browse `dbo.vw_OnboardingFunnel`, `dbo.vw_Application`, and `dbo.vw_Payments`.
+1. `sql/01_create_schema.sql` creates `DigitalBankDW`, the tables, and the keys.
+2. Set `@DataPath` in `sql/02_load_and_validate.sql`, then execute it. It loads the CSVs and returns the validation grid. `PASS` and `INFO` are expected. A `FAIL` raises after the grid.
 
-`02_load_data.sql` refuses to load into a database that already has customers. To reload, run `01_create_tables.sql` again and then `02`.
+To reload, run script 1 again, then script 2.
 
 The CSVs use LF line endings. The load strips a trailing CR, so a copy that was turned into CRLF still loads. `BULK INSERT` reads the path from the server, not from your laptop, when SQL Server is remote.
 

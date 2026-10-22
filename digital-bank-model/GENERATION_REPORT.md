@@ -1,6 +1,6 @@
 # Generation report
 
-Synthetic digital-bank star schema. Checks mirror `sql/04_validate.sql`.
+Synthetic digital-bank star schema. Checks mirror `sql/02_load_and_validate.sql`.
 
 | Status | Check | Detail |
 | --- | --- | --- |

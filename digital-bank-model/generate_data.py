@@ -60,7 +60,6 @@ from model_schema import (
     in_range,
 )
 from validate_csvs import validate
-from write_sql import write_sql_scripts
 
 EPOCH = datetime(CALENDAR_START.year, CALENDAR_START.month, CALENDAR_START.day)
 AS_OF_ORD = (AS_OF - CALENDAR_START).days
@@ -879,7 +878,6 @@ def generate(customers: int, primary_payments: int, seed: int, out_dir: Path) ->
     print(report.text())
     publish = out_dir.resolve() == (Path(__file__).resolve().parent / "csv").resolve()
     if publish:
-        write_sql_scripts(Path(__file__).resolve().parent / "sql", manifest)
         report_path = Path(__file__).resolve().parent / "GENERATION_REPORT.md"
         report_path.write_text(report.markdown(), encoding="utf-8")
         print(f"Report written to {report_path}")
@@ -888,7 +886,7 @@ def generate(customers: int, primary_payments: int, seed: int, out_dir: Path) ->
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Generate digital bank CSVs and SSMS scripts.")
+    parser = argparse.ArgumentParser(description="Generate digital bank CSVs.")
     parser.add_argument("--customers", type=int, default=50_000)
     parser.add_argument("--primary-payments", type=int, default=960_000)
     parser.add_argument("--seed", type=int, default=42)
