@@ -107,7 +107,7 @@ Allied Bank, JS Bank, and Bank of Punjab are the timeout-prone beneficiary banks
 
 ## DimDate
 
-One row per day from 1 Oct 2025 through 3 Oct 2026. The extra days cover payment retries that fall just after 30 Sep 2026. Measures and the salary/Eid checks use 1 Oct 2025–30 Sep 2026.
+One row per day from 1 Oct 2025 through 30 Sep 2026. Salary-week and Eid checks use that same year.
 
 | Column | Rule |
 | --- | --- |
