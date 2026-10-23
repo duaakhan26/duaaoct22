@@ -1,0 +1,12 @@
+TableName,ExpectedRows
+DimCustomer,50000
+DimAccount,36366
+DimChannel,7
+DimOnboardingStep,8
+DimFailureReason,14
+DimBank,34
+DimDate,365
+DimTime,24
+FactOnboardingEvents,339338
+FactApplication,50000
+FactPayments,100871

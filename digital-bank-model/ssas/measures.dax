@@ -1,0 +1,84 @@
+// Measures for the SSAS Tabular model.
+// Relationships are one-to-many, single direction, from each dimension to the fact.
+// Keep one active date relationship per fact:
+//   FactOnboardingEvents[DateKey], FactApplication[StartDateKey], FactPayments[DateKey].
+// Leave SignupDateKey, OpenDateKey, EndDateKey, ActivationDateKey, and FirstPaymentDateKey inactive.
+// Mark DimDate as the date table. Hide keys and raw columns. Put these measures in display folders.
+
+// ----- Onboarding -----
+
+Applications Started =
+COUNTROWS ( FactApplication )
+
+Applications Completed =
+CALCULATE (
+    COUNTROWS ( FactApplication ),
+    FactApplication[FinalStatus] = "Completed"
+)
+
+Conversion % =
+DIVIDE ( [Applications Completed], [Applications Started] )
+
+Median Minutes to Open =
+MEDIAN ( FactApplication[MinutesToOpen] )
+
+Activation Rate =
+DIVIDE (
+    COUNTROWS (
+        FILTER (
+            FactApplication,
+            FactApplication[FinalStatus] = "Completed"
+                && NOT ISBLANK ( FactApplication[ActivationDateKey] )
+                && DATEDIFF (
+                    LOOKUPVALUE (
+                        DimAccount[OpenDate],
+                        DimAccount[AccountKey], FactApplication[AccountKey]
+                    ),
+                    LOOKUPVALUE (
+                        DimDate[FullDate],
+                        DimDate[DateKey], FactApplication[ActivationDateKey]
+                    ),
+                    DAY
+                ) <= 30
+        )
+    ),
+    [Applications Completed]
+)
+
+// ----- Payments -----
+
+Total Payments =
+COUNTROWS ( FactPayments )
+
+Successful Payments =
+CALCULATE ( COUNTROWS ( FactPayments ), FactPayments[Status] = "Success" )
+
+Failure Rate =
+DIVIDE ( [Total Payments] - [Successful Payments], [Total Payments] )
+
+Failed Value PKR =
+CALCULATE ( SUM ( FactPayments[AmountPKR] ), FactPayments[Status] = "Failed" )
+
+Retry Recovery Rate =
+DIVIDE (
+    CALCULATE (
+        COUNTROWS ( FactPayments ),
+        FactPayments[IsRetry] = TRUE (),
+        FactPayments[Status] = "Success"
+    ),
+    CALCULATE ( COUNTROWS ( FactPayments ), FactPayments[IsRetry] = TRUE () )
+)
+
+Avg Latency =
+AVERAGE ( FactPayments[LatencyMs] )
+
+// ----- Combined -----
+
+First-Payment Success Rate =
+DIVIDE (
+    CALCULATE ( COUNTROWS ( FactApplication ), FactApplication[FirstPaymentStatus] = "Success" ),
+    CALCULATE (
+        COUNTROWS ( FactApplication ),
+        FactApplication[FirstPaymentStatus] IN { "Success", "Failed" }
+    )
+)

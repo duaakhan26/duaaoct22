@@ -1,0 +1,15 @@
+FailureReasonKey,Reason,Category,IsRetryable,AppliesTo
+1,NADRA mismatch,fraud/compliance,0,Onboarding
+2,Liveness failed,customer,1,Onboarding
+3,Document unclear,customer,1,Onboarding
+4,Abandoned,customer,0,Onboarding
+5,Sanctions/AML screening hit,fraud/compliance,0,Onboarding
+6,Duplicate account,fraud/compliance,0,Onboarding
+7,Insufficient funds,customer,1,Payment
+8,Wrong account or IBAN,customer,1,Payment
+9,Limit exceeded,customer,0,Payment
+10,OTP expired,customer,1,Both
+11,Rail timeout,network/rail,1,Payment
+12,Beneficiary bank timeout,network/rail,1,Payment
+13,Fraud-rule block,fraud/compliance,0,Payment
+14,Biller downtime,bank-side,1,Payment

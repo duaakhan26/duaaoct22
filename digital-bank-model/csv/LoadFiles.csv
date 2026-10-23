@@ -1,0 +1,12 @@
+FileName,TableName,ExpectedRows
+DimCustomer.csv,DimCustomer,50000
+DimAccount.csv,DimAccount,36366
+DimChannel.csv,DimChannel,7
+DimOnboardingStep.csv,DimOnboardingStep,8
+DimFailureReason.csv,DimFailureReason,14
+DimBank.csv,DimBank,34
+DimDate.csv,DimDate,365
+DimTime.csv,DimTime,24
+FactOnboardingEvents.csv,FactOnboardingEvents,339338
+FactApplication.csv,FactApplication,50000
+FactPayments.csv,FactPayments,100871

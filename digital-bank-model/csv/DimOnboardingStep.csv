@@ -1,0 +1,9 @@
+StepKey,StepName,StepOrder,FunnelStage
+1,Download app,1,Acquisition
+2,Mobile OTP,2,Verification
+3,CNIC capture,3,Verification
+4,NADRA biometric and selfie liveness,4,Verification
+5,Address and profile,5,Opening
+6,Account opened,6,Opening
+7,First login,7,Activation
+8,First payment,8,Activation
